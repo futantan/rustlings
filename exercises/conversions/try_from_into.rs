@@ -21,8 +21,6 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
-
 // Your task is to complete this implementation
 // and return an Ok result of inner type Color.
 // You need to create an implementation for a tuple of three integers,
@@ -32,10 +30,29 @@ enum IntoColorError {
 // but the slice implementation needs to check the slice length!
 // Also note that correct RGB color values must be integers in the 0..=255 range.
 
+fn guard_num_range(num: i16) -> Result<u8, IntoColorError> {
+    if num < 0 || num > 255 {
+        return Err(IntoColorError::IntConversion);
+    }
+    Ok(num as u8)
+}
+
+fn guard_slice_range(slice: &[i16]) -> Result<(), IntoColorError> {
+    if slice.len() != 3 {
+        return Err(IntoColorError::BadLen);
+    }
+    Ok(())
+}
+
 // Tuple implementation
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let (r, g, b) = tuple;
+        let red = guard_num_range(r)?;
+        let green = guard_num_range(g)?;
+        let blue = guard_num_range(b)?;
+        Ok(Color { red, green, blue })
     }
 }
 
@@ -43,6 +60,11 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        let [r, g, b] = arr;
+        let red = guard_num_range(r)?;
+        let green = guard_num_range(g)?;
+        let blue = guard_num_range(b)?;
+        Ok(Color { red, green, blue })
     }
 }
 
@@ -50,6 +72,11 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        guard_slice_range(slice)?;
+        let red = guard_num_range(slice[0])?;
+        let green = guard_num_range(slice[1])?;
+        let blue = guard_num_range(slice[2])?;
+        Ok(Color { red, green, blue })
     }
 }
 
