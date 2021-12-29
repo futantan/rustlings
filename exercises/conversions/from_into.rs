@@ -33,10 +33,40 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of Person
 // Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
+fn guard_str_length(s: &str) -> Result<&str, ()> {
+    if s.len() == 0 {
+        return Err(());
+    }
+    Ok(s)
+}
+
+fn guard_splitted_length(v: Vec<&str>) -> Result<Vec<&str>, ()> {
+    if v.len() != 2 {
+        return Err(());
+    }
+    Ok(v)
+}
+
+fn parse_name_and_age(v: Vec<&str>) -> Result<(String, usize), ()> {
+    let name = v[0].to_string();
+    if String::is_empty(&name) {
+        return Err(());
+    }
+
+    if let Ok(age) = v[1].parse::<usize>() {
+        return Ok((name, age));
+    }
+    return Err(());
+}
 
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        Ok(s)
+            .and_then(guard_str_length)
+            .map(|s| s.split(",").collect())
+            .and_then(guard_splitted_length)
+            .and_then(parse_name_and_age)
+            .map_or(Person::default(), |(name, age)| Person { name, age })
     }
 }
 
